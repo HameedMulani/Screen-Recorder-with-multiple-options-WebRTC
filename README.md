@@ -9,3 +9,5 @@ User can <b>Download</b> recorded Video in <b>.webm and .mp4 extentions</b> <br>
 4. Screen recording with Mic and Camera.
 5. Screen recording with Internal Audio and Camera.
 </b>
+## Data Flow Diagram for Screen Recording
+
