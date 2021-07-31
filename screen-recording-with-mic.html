@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia">
+<style>
+		#video{
+			border: 1px solid #999;
+			width: 40% ;
+			max-width: 460%;
+        }
+        #start{
+        	border: 2px solid green;
+            border-radius: 8px;
+        	padding:0.5%;
+            background: black;
+            color:white; 
+            margin-right: 3%;
+            font-family: "Sofia", sans-serif;
+        }
+         #stop{
+        	border: 2px solid red;
+            border-radius: 8px;
+        	padding: 0.5%;
+            background: black;
+            color: white;
+            margin-left: 3%;
+            font-family: "Sofia", sans-serif;
+        }
+         #down{
+        	border: 2px solid black;
+            border-radius: 8px;
+        	padding: 0.5%;
+            background: black;
+            color: white;
+            font-family: "Sofia", sans-serif;
+        }
+	</style>
+</head>
+	<body style="background-image: url(pic.jpeg); background-repeat: no-repeat; background-size: 100%; " >
+<br><br>
+<h1 style="text-align: center; color:white;"> SCREEN  RECORDING </h1><br><br>
+<center><button id="start"> Start Recording  </button>
+<button id="stop"> Stop Recording </button></center><br><br>
+<br>
+<center><video id="video" autoplay> </video></center>
+<br>
+<center><a href="" id="down">Download this recording</a></center><br><br><br>
+<script>
+	// we are accessing HTML Dom elements using these 3 variables
+
+	const start = document.getElementById("start");
+	const stop = document.getElementById("stop");
+	const video = document.querySelector("video");
+	let recorder, stream;
+
+	async function startRecording() {
+		screenStream = await navigator.mediaDevices.getDisplayMedia({
+			video: { mediaSource: "screen" },
+			audio:false
+		});
+		audioStream = await navigator.mediaDevices.getUserMedia({
+			audio: true
+		});
+
+		/**
+		 * Combine audio and screen streams to one
+		 * This will merge screen and and audio to one variable object
+		 * */
+		let combinedStreams = new MediaStream([...screenStream.getTracks(), ...audioStream.getTracks()]);
+		recorder = new MediaRecorder(combinedStreams);
+	
+		const chunks = [];
+		recorder.ondataavailable = e => chunks.push(e.data);
+		recorder.onstop = e => {
+			const completeBlob = new Blob(chunks, { type: chunks[0].type });
+			/**
+			 * On stop event we got the Video content attaching it to video tag to play on screen
+			 * This can be optional
+			 * */
+			video.src = URL.createObjectURL(completeBlob);
+			/**
+			 * Below code will create download link for created video
+			 * Here we are attching the blob(content of the file) to link which browser will download
+			 * */
+			let v = URL.createObjectURL(completeBlob);
+			var link = document.getElementById("down"); 
+			link.href = v;
+			link.download = "Screen-recording.webm"       
+		};
+	
+		recorder.start();
+	}
+	/**
+	 * On button click start/stop call functions
+	 * */
+	start.addEventListener("click", () => {
+		start.setAttribute("disabled", true);
+		stop.removeAttribute("disabled");
+		// start recording function written above will be called
+		startRecording();
+	});
+	stop.onclick = () => screenStream.getTracks().forEach(track => track.stop());
+	stop.addEventListener("click", () => {
+		stop.setAttribute("disabled", true);
+		start.removeAttribute("disabled");
+		// here we stop the recording
+		recorder.stop();
+		mediaRecorder.stop()
+		stream.getVideoTracks()[0].stop();
+	});
+
+</script>
+</body>
+</html>

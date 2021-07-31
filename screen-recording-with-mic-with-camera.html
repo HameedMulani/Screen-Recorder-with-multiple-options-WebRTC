@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Screen recording application</title>
+    <meta name="viewport" content="width=device-width">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.11.0/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.11.0/sweetalert2.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+      <style>
+    .video-container {
+        position: fixed;
+        top: 2.1px;
+        right: 1px;
+    }
+     #down{
+            border: 2px solid black;
+            border-radius: 8px;
+            padding: 0.5%;
+            background: black;
+            color: white;
+            font-family: "Sofia", sans-serif;
+        }
+</style>
+</head>
+<body style="background-image: url(pic.jpeg); background-repeat: no-repeat; background-size: 100%; ">
+    <header>
+        <h1 style="text-align: center; color: red">Screen recording with mic with camera</h1>
+            <h2 style="color: blue; text-align: center">Click on Start Recording Button to start recording</h2>
+            <br>
+
+    </header>
+    <form enctype="multipart/form-data" id="myForm">
+        <input type="hidden" name="audio_file "id="audio_file" value="Hello" />
+        <input type="hidden" name="video_file" id="video_file" value="Hey" />
+    </form>
+    <hr>
+        <div class="row container-fluid">
+            <div class="col-lg-12 col-md-12 col-12">
+                <div class="row">
+                    <div class="col-md-2">
+                        
+                    </div>
+                    <div class="col-md-4">
+                        <button id="startButton" class="button mx-auto" style="background-color: green ;width:100px; align-content: center;">START RECORDING</button>
+                    </div>
+                    <div class="col-md-2">
+                        
+                    </div>
+                    <div class="col-md-4">
+                       <button id="stopButton" class="button" style="background-color: red ;width:100px;">STOP RECORDING</button>
+                    </div>
+                    <div class="col-md-8 py-5 container-fluid">
+                        <center><button style="width:100px;background-color:blue;margin-top: 48px; align-content: center; padding: 8px;" styletype="submit" name="click" id="submit" class="mx-auto">Download</button></center>
+                    </div>
+                </div>
+                
+        <br>
+        <!-- <h2>Preview</h2> -->
+        <hr>
+        <!-- <video id="video" controls muted></video><br> -->
+        <br>
+        <br>
+        <!-- <h2>Recording</h2> -->
+        <video hidden id="vid2" controls Picture in picture></video>
+        <a hidden id="downloadButton1" class="button">
+        Download1
+        </a>
+        
+        <!-- could save to canvas and do image manipulation and saving too -->    
+    <script>
+
+    function stop(stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+    var audio_blob;
+    var video_blob;
+    var videoURL;
+    var videoURL2;
+
+
+        
+        let constraintObj = { 
+            audio: {
+
+                echoCancellation: true,
+            }, 
+            video: true
+        }
+        // width: 1280, height: 720  -- preference only
+        // facingMode: {exact: "user"}
+        // facingMode: "environment"
+        
+        //handle older browsers that might implement getUserMedia in some way
+        if (navigator.mediaDevices === undefined) {
+            navigator.mediaDevices = {};
+            navigator.mediaDevices.getUserMedia = function(constraintObj) {
+                let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                if (!getUserMedia) {
+                    return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+                }
+                return new Promise(function(resolve, reject) {
+                    getUserMedia.call(navigator, constraintObj, resolve, reject);
+                });
+            }
+        }else{
+            navigator.mediaDevices.enumerateDevices()
+            .then(devices => {
+                devices.forEach(device=>{
+                    console.log(device.kind.toUpperCase(), device.label);
+                    //, device.deviceId
+                })
+            })
+            .catch(err=>{
+                console.log(err.name, err.message);
+            })
+        }
+
+        navigator.mediaDevices.getUserMedia(constraintObj)
+        .then(function(mediaStreamObj) {
+            //connect the media stream to the first video element
+            let video = document.getElementById('video');
+            if ("srcObject" in video) {
+                video.srcObject = mediaStreamObj;
+            } else {
+                //old version
+                video.src = window.URL.createObjectURL(mediaStreamObj);
+            }
+            
+            video.onloadedmetadata = function(ev) {
+                //show in the video element what is being captured by the webcam
+                //video.play();
+            };
+            
+            //add listeners for saving video/audio
+            let start = document.getElementById('startButton');
+            let stop = document.getElementById('stopButton');
+            let vidSave = document.getElementById('vid2');
+            downloadButton1 = document.getElementById("downloadButton1");
+            var A1=document.getElementById('A');
+            let mediaRecorder = new MediaRecorder(mediaStreamObj);
+            let chunks = [];
+            
+            start.addEventListener('click', (ev)=>{
+                video.play();
+                mediaRecorder.start();
+                console.log(mediaRecorder.state);
+            })
+            stop.addEventListener('click', (ev)=>{
+                mediaRecorder.stop();
+                video.pause();
+                console.log(mediaRecorder.state);
+            });
+            mediaRecorder.ondataavailable = function(ev) {
+                chunks.push(ev.data);
+            }
+            mediaRecorder.onstop = (ev)=>{
+                let blob = new Blob(chunks, { 'type' : 'video/mp4;' });
+                audio_blob = blob;
+                chunks = [];
+                videoURL = window.URL.createObjectURL(blob);
+                vidSave.src = videoURL;
+                $('#audio_file').val(videoURL);
+                $('#myForm').submit();
+                // downloadButton1.href = videoURL;
+                // downloadButton1.download = "Audio.mp4";
+                //downloadButton1.click();
+                A1=videoURL;
+                // vid2.play();
+            }
+        })
+        .catch(function(err) { 
+            console.log(err.name, err.message); 
+        });
+        
+        /*********************************
+        getUserMedia returns a Promise
+        resolve - returns a MediaStream Object
+        reject returns one of the following errors
+        AbortError - generic unknown cause
+        NotAllowedError (SecurityError) - user rejected permissions
+        NotFoundError - missing media track
+        NotReadableError - user permissions given but hardware/OS error
+        OverconstrainedError - constraint video settings preventing
+        TypeError - audio: false, video: false
+        *********************************/
+    </script>
+</div>
+<div class="col-lg-6 col-md-6 col-12">
+    <div class="left">
+        <!-- <h2>Preview</h2> -->
+        <video hidden id="preview" width="160" height="120" controls autoplay></video>
+    </div>
+
+    <div class="right">
+        <!-- <h2>Recording</h2> -->
+        <video hidden id="recording" width="160" height="120" controls></video>
+        <a hidden id="downloadButton" class="button">
+        Download
+        </a>
+    </div>
+
+
+
+
+
+    <script>
+    let preview = document.getElementById("preview");
+    let recording = document.getElementById("recording");
+    let startButton = document.getElementById("startButton");
+    let stopButton = document.getElementById("stopButton");
+    downloadButton = document.getElementById("downloadButton");
+    var V1=document.getElementById('V');
+    let logElement = document.getElementById("log");
+
+    let recordingTimeMS = 10000;
+    var displayMediaOptions ={
+            video:{
+                cursor:'always'
+            },
+            audio:false
+        }
+
+
+    function log(msg) {
+        //logElement.innerHTML += msg + "\n";
+    }
+
+    function wait(delayInMS) {
+        return new Promise(resolve => setTimeout(resolve, delayInMS));
+    }
+
+    function startRecording(stream, lengthInMS) {
+        recorder = new MediaRecorder(stream);
+        let chunks = [];
+
+        recorder.ondataavailable = event => chunks.push(event.data);
+        recorder.start();
+        log(recorder.state + " for " + (lengthInMS/1000) + " seconds...");
+
+        let stopped = new Promise((resolve, reject) => {
+        recorder.onstop = resolve;
+        recorder.onerror = event => reject(event.name);
+        });
+
+  recorder.onstop = function(e) {
+    console.log("data available after recorder.stop() called.");
+
+    // var audio = document.createElement('audio');
+    // audio.controls = true;
+    var blob = new Blob(chunks, { 'type' : 'video/mp4;' });
+    video_blob = blob;
+    recording.src = window.URL.createObjectURL(blob);
+    videoURL2 = recording.src;
+    // downloadButton.href = recording.src;
+    // console.log("File: " + downloadButton.href);
+    console.log("File: " + blob);
+    $('#video_file').val(recording.src);
+    // downloadButton.download = "ScreenRecording.mp4";
+    //downloadButton.click();
+    V1=recording.src;
+    console.log("recorder stopped");
+    stopButton.click();
+    //$('#myForm').submit();
+
+  // $(document).ajaxStart(function(){
+  //   $("#wait").css("display", "block");
+  // });
+  // $(document).ajaxComplete(function(){
+  //   $("#wait").css("display", "none");
+  // });
+
+    
+  }
+
+
+        return Promise.all([
+            stopped,
+            recorded
+        ])
+        .then(() => data);
+    }
+
+
+    startButton.addEventListener("click", function() {
+        navigator.mediaDevices.getDisplayMedia(displayMediaOptions
+            ).then(stream => {
+                preview.srcObject = stream;
+                // downloadButton.href = stream;
+                preview.captureStream = preview.captureStream || preview.mozCaptureStream;
+                return new Promise(resolve => preview.onplaying = resolve);
+              }).then(() => startRecording(preview.captureStream(), recordingTimeMS))
+              .catch(log);
+        }, false);
+
+
+        stopButton.addEventListener("click", function() {
+            stop(preview.srcObject);
+        }, false);
+
+    </script>
+</div>
+</div>
+    <script type="text/javascript">
+        $('#myForm').on('submit', function(e) {
+        e.preventDefault()
+
+        formData = new FormData();
+        formData.append('audio_file', audio_blob, 'audio.mp4');
+        formData.append('video_file', video_blob, 'video.mp4');
+        console.log(audio_blob)
+        console.log(video_blob)
+        // console.log(formData.values())
+
+        $.ajax({
+            url: 'output.php',
+            type: 'POST',
+            contentType:false,
+            cache:false,
+            processData:false,
+            data:  formData,
+            success: function(obj) {
+                console.log("Response: " + obj)  
+                a = document.createElement('a');
+                a.href = 'upload/audio_filevideo_file.webm';
+                a.download = 'Recordedscreen.mp4';
+                a.click();              
+            },
+            error: function(obj){
+                console.log(obj)
+                alert('error')
+            }
+        });
+    });
+    </script>
+   <div class="video-container">
+    <video width="260" height="120" id="video" muted>
+    </video>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Capstone Project-CO6I</title>
+    <style>
+          html, body {
+      display: flex;
+      justify-content: center;
+      font-family: Roboto, Arial, sans-serif;
+      font-size: 15px;
+      background-color: black;
+      }
+      form {
+      border: 5px solid #f1f1f1;
+      margin-top: 20%;
+      background-image: url("ligth.jpg");
+      }
+      /* button {
+      background-color: #8ebf42;
+      color: white;
+      padding: 14px 0;
+      margin: 10px 0;
+      border: none;
+      cursor: grabbing;
+      width: 100%;
+      } */
+      h1 {
+      text-align:center;
+      font-size:18;
+      }
+      button:hover {
+      opacity: 0.8;
+      }
+      .formcontainer {
+      text-align: left;
+      margin: 24px 50px 12px;
+      }
+      .container {
+      padding: 16px 0;
+      text-align:left;
+      }
+      span.psw {
+      float: right;
+      padding-top: 0;
+      padding-right: 15px;
+      }
+      /* Change styles for span on extra small screens */
+      @media screen and (max-width: 300px) {
+      span.psw {
+      display: block;
+      float: none;
+      }
+      }
+    </style>
+
+</head>
+<body>
+       <form>
+        <h1>Screen Recorder</h1>
+        <div class="formcontainer">
+        <hr/>
+        <div class="container">
+            <label for="method"><strong>Select Option For Recording:</strong></label>
+            <select class="select" onchange="location = this.value;">
+
+            <option value="#">Select*</option>
+            <option value="only-screen-recording.html"><strong>Screen Recording</strong></option>
+            <option value="screen-recording-with-mic.html"><strong>Screen with Mic</strong></option>
+            <option value="screen-recording-with-internal-audio.html"><strong>Screen with InternalAudio</strong></option>
+            <option value="screen-recording-with-mic-with-camera.html"><strong>Screen with Mic and webCam</strong>
+            </option> 
+            
+            <option value="screen-recording-with-internal-audio-with-camera.html"><strong>Screen with InternalAudio and webCam</strong></option>
+
+
+           </select>
+        <br><br>
+      </form>
+</body>
+</html>
