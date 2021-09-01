@@ -8,6 +8,7 @@ User can <b>Download</b> recorded Video in <b>.webm and .mp4 extentions</b> <br>
 3. Screen recording with Internal Audio.
 4. Screen recording with Mic and Camera.
 5. Screen recording with Internal Audio and Camera.
+<br><br>Tech Includes: JavaScript, PHP, html, css<br>
 <br>	:boom: web site link Try Here: https://hameedmulani.github.io/Screen-Recorder-with-multiple-options-WebRTC/ 
 </b>
 
